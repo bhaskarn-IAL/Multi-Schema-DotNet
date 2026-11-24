@@ -39,6 +39,15 @@ namespace MultiSchema.BLL.Common.Implementation
                 ApprovalStatus = "PENDING"
             };
 
+            var data = (from ea in _db.ProductMetadata
+                        join xd in _db.AuditTrail
+                        on ea.MetaKey equals xd.Action
+                        select new
+                        {
+                            ea.MetaKey,
+                            xd.Action
+                        }).ToArray();
+
             // Explicit transaction because we need the generated id for the audit rows (two SaveChanges).
             // Same connection, same database -> a plain local transaction spans mrm and aud. No DTC.
             await using var tx = await _db.Database.BeginTransactionAsync(ct);
